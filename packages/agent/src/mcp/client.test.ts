@@ -72,4 +72,38 @@ describe('BridgeMcpClient', () => {
     expect(JSON.stringify(result)).toMatch(/cancelled|guests/i);
     await mcp.close();
   });
+
+  it('starts a new session when the server has forgotten the old one', async () => {
+    // What a redeployed server answers for a session it no longer has (the spec's 404).
+    let forget = false;
+    const mcp = new BridgeMcpClient({
+      url: server.url,
+      auth: { headers: {} },
+      callTimeoutMs: 10_000,
+      onElicitation: async () => ({ action: 'decline' }),
+      logger,
+      fetch: async (url, init) => {
+        if (forget && typeof init?.body === 'string' && init.body.includes('"tools/call"')) {
+          forget = false;
+          const body = {
+            jsonrpc: '2.0',
+            error: { code: -32001, message: 'Unknown session.' },
+            id: null,
+          };
+          return new Response(JSON.stringify(body), {
+            status: 404,
+            headers: { 'content-type': 'application/json' },
+          });
+        }
+        return fetch(url, init);
+      },
+    });
+    await mcp.connect();
+    forget = true;
+    methods = [];
+    const result = await mcp.callTool('get_weather', { city: 'Berlin' });
+    expect(result.isError).not.toBe(true);
+    expect(methods).toEqual(['initialize', 'tools/list', 'tools/call']);
+    await mcp.close();
+  });
 });

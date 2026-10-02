@@ -1,5 +1,8 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import {
+  StreamableHTTPClientTransport,
+  StreamableHTTPError,
+} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import {
   ElicitRequestSchema,
   type ElicitRequestParams,
@@ -14,7 +17,8 @@ import { alexaPlusVersionWarning, requireProtocolVersion } from './version.js';
 /**
  * Thin wrapper over the MCP SDK client. It owns the session with the developer's server:
  * initialize with the elicitation capability, version check, tool list, tool calls with a
- * timeout long enough to stay parked on a spoken answer, and one reconnect after a drop.
+ * timeout long enough to stay parked on a spoken answer, and one reconnect after a drop or
+ * after the server forgot the session (a restart or redeploy answers 404, per the spec).
  *
  * The raw SDK client is used instead of Strands' McpClient because the bridge needs
  * structuredContent, the negotiated protocol version, and a per-call timeout above the
@@ -46,6 +50,11 @@ export interface BridgeMcpClientOptions {
   logger: Logger;
   /** Replacement fetch (SigV4 signing for the Gateway). */
   fetch?: FetchLike;
+}
+
+/** The server no longer knows our session: it answers 404 and expects a new initialize. */
+function sessionExpired(err: unknown): boolean {
+  return err instanceof StreamableHTTPError && err.code === 404;
 }
 
 export class BridgeMcpClient {
@@ -95,7 +104,25 @@ export class BridgeMcpClient {
     args: Record<string, unknown>,
     options: { signal?: AbortSignal } = {},
   ): Promise<McpToolResult> {
-    const client = await this.ensureClient();
+    try {
+      return await this.callToolOn(await this.ensureClient(), name, args, options);
+    } catch (err) {
+      // A 404 is the server refusing the session before running anything, so one retry on a
+      // new session cannot run a tool twice. Without it, every warm container fails every call
+      // after the developer's server restarts, until the container itself is recycled.
+      if (!sessionExpired(err)) throw err;
+      this.options.logger.warn('mcp session expired; starting a new one', { tool: name });
+      await this.close();
+      return this.callToolOn(await this.ensureClient(), name, args, options);
+    }
+  }
+
+  private async callToolOn(
+    client: Client,
+    name: string,
+    args: Record<string, unknown>,
+    options: { signal?: AbortSignal },
+  ): Promise<McpToolResult> {
     const raw = await client.callTool({ name, arguments: args }, undefined, {
       timeout: this.options.callTimeoutMs,
       ...(options.signal ? { signal: options.signal } : {}),
