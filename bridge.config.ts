@@ -35,7 +35,7 @@ export default defineConfig({
 
   skill: {
     // What the user says after "Alexa, open ...". Lowercase words only.
-    invocationName: 'bridge demo',
+    invocationName: 'care circle',
     // Your skill id goes in .env as BRIDGE_SKILL_ID, not here. Set it after `ask deploy`
     // prints it and run `npm run deploy` again so the Lambda only accepts your skill.
     // Only en-US ships today. The code path is per-locale; nothing hardcodes en-US.
@@ -48,7 +48,7 @@ export default defineConfig({
 
   agent: {
     // Bedrock model id. Nova 2 Lite via its cross-region inference profile.
-    modelId: 'us.amazon.nova-2-lite-v1:0',
+    modelId: 'us.amazon.nova-pro-v1:0',
     // Nova 2 reasoning effort: 'off' | 'low' | 'medium' | 'high'. 'off' sends no reasoning
     // config and is what the 6.5 s turn budget assumes; 'low' adds about 1.5 s per turn.
     reasoningEffort: 'off',
@@ -90,8 +90,10 @@ export default defineConfig({
     shortTerm: true,
     // Long-term user preference and summary extraction. Costs a model call per session.
     longTerm: true,
-    // Events rehydrated into the agent's history on cold start.
-    hydrateLastEvents: 20,
+    // Events rehydrated into the agent's history on cold start. 0 for CareCircle: the MCP server
+    // is the family's record, and replayed answers (stored without the tool calls behind them)
+    // let the model repeat a stale one instead of asking the server; measured on the dev skill.
+    hydrateLastEvents: 0,
   },
 
   features: {
@@ -102,10 +104,16 @@ export default defineConfig({
     // One Alexa intent per MCP tool, with typed slots and entity resolution. Turn this off to
     // send the whole spoken phrase to the agent instead: the interaction model then stops
     // depending on your tool schemas, so changing a tool needs no `ask deploy` (D38).
-    toolIntents: true,
+    // Off for CareCircle: measured on Alexa's own NLU (CareCircle scripts/evals-echo.ts), tool
+    // intents caught paraphrases and handed the agent a tool name without the sentence. Off,
+    // held-out phrasings reaching the agent went from 36/66 to 63/66 and wrong tools from 5 to 0.
+    toolIntents: false,
     // Also add a catch-all intent, so anything the tool intents do not recognise still reaches
     // the agent as text instead of vanishing in Alexa's fallback (which carries no text).
     catchAll: true,
+    // How readily Alexa drops a phrase into its fallback, which carries no text. LOW sends
+    // more untrained phrasings to the catch-all instead. Unset: Alexa's default, MEDIUM.
+    fallbackSensitivity: 'LOW',
   },
 
   aws: {

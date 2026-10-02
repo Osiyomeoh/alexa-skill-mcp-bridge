@@ -5,529 +5,610 @@
   },
   "protocolVersion": "2025-11-25",
   "server": {
-    "name": "national-parks",
+    "name": "carecircle",
     "version": "0.1.0",
-    "instructions": "This server answers questions about fourteen US national parks from a fixed extract of public National Park Service data: which activities each park offers, what is open in which month, and what each park is known for. Ask about a named park, or ask which park suits an activity, a month, or a state. The answer depends on all three, so a tool asks for what is missing when the question would otherwise be underdetermined. Unofficial demo, not affiliated with the National Park Service."
+    "instructions": "CareCircle tracks what needs to happen for someone being cared for, and who is responsible for it. Speak results as written - they are phrased for a voice assistant. Never say that someone did not take a medication or did not do something: the system only knows what has been recorded, and an absent record is not evidence. When a tool returns an error, follow the instruction in it."
   },
   "tools": [
     {
-      "name": "plan_park_visit",
-      "description": "What a named national park is like in a given month: what is open, what is limited, and what the park is known for. Asks which month when none is given, because access changes through the year.",
-      "intent": "PlanParkVisitIntent",
+      "name": "log_care_event",
+      "description": "Record that something happened - a medication taken, a meal eaten, a check-in, how someone is feeling. Use this for things that ALREADY happened. For something scheduled in the future use record_appointment instead; for an observation or concern with no action attached use add_note. When what happened is that a task or errand got done - a ride given, a pickup made, a job finished - that closes the task: use resolve_obligation. In Nigerian Pidgin \"I don take am\", \"I don use my drops\" means it HAS been done (\"don\" marks the past, not \"don't\"). Only for the care of someone in this circle: never a smart-home action (lights, a vacuum, a coffee maker).",
+      "intent": "LogCareEventIntent",
       "slots": [
         {
-          "argument": "park",
-          "slot": "park",
-          "slotType": "ParkType",
+          "argument": "kind",
+          "slot": "kind",
+          "slotType": "KindType",
           "required": true,
           "customType": {
-            "name": "ParkType",
+            "name": "KindType",
             "values": [
               {
-                "value": "yosemite",
-                "id": "yosemite",
+                "value": "medication taken",
+                "id": "medication_taken",
                 "synonyms": [
-                  "Yosemite"
+                  "medication_taken"
                 ]
               },
               {
-                "value": "yellowstone",
-                "id": "yellowstone",
+                "value": "check in",
+                "id": "check_in",
                 "synonyms": [
-                  "Yellowstone"
-                ]
-              },
-              {
-                "value": "glacier",
-                "id": "glacier",
-                "synonyms": [
-                  "Glacier"
-                ]
-              },
-              {
-                "value": "grand canyon",
-                "id": "grand_canyon",
-                "synonyms": [
-                  "Grand Canyon"
-                ]
-              },
-              {
-                "value": "everglades",
-                "id": "everglades",
-                "synonyms": [
-                  "Everglades"
-                ]
-              },
-              {
-                "value": "katmai",
-                "id": "katmai",
-                "synonyms": [
-                  "Katmai"
-                ]
-              },
-              {
-                "value": "great basin",
-                "id": "great_basin",
-                "synonyms": [
-                  "Great Basin"
-                ]
-              },
-              {
-                "value": "acadia",
-                "id": "acadia",
-                "synonyms": [
-                  "Acadia"
-                ]
-              },
-              {
-                "value": "zion",
-                "id": "zion",
-                "synonyms": [
-                  "Zion"
-                ]
-              },
-              {
-                "value": "rocky mountain",
-                "id": "rocky_mountain",
-                "synonyms": [
-                  "Rocky Mountain"
-                ]
-              },
-              {
-                "value": "olympic",
-                "id": "olympic",
-                "synonyms": [
-                  "Olympic"
-                ]
-              },
-              {
-                "value": "joshua tree",
-                "id": "joshua_tree",
-                "synonyms": [
-                  "Joshua Tree"
-                ]
-              },
-              {
-                "value": "great smoky mountains",
-                "id": "great_smoky_mountains",
-                "synonyms": [
-                  "Great Smoky Mountains"
-                ]
-              },
-              {
-                "value": "bryce canyon",
-                "id": "bryce_canyon",
-                "synonyms": [
-                  "Bryce Canyon"
+                  "check_in"
                 ]
               }
             ]
           }
         },
         {
-          "argument": "month",
-          "slot": "month",
-          "slotType": "MonthType",
+          "argument": "notOnSchedule",
+          "slot": "notOnSchedule",
+          "slotType": "YesNoType",
           "required": false,
           "customType": {
-            "name": "MonthType",
+            "name": "YesNoType",
             "values": [
               {
-                "value": "january",
-                "id": "january",
+                "value": "yes",
+                "id": "yes",
                 "synonyms": [
-                  "January"
+                  "yeah",
+                  "yep",
+                  "sure",
+                  "correct",
+                  "right",
+                  "okay"
                 ]
               },
               {
-                "value": "february",
-                "id": "february",
+                "value": "no",
+                "id": "no",
                 "synonyms": [
-                  "February"
-                ]
-              },
-              {
-                "value": "march",
-                "id": "march",
-                "synonyms": [
-                  "March"
-                ]
-              },
-              {
-                "value": "april",
-                "id": "april",
-                "synonyms": [
-                  "April"
-                ]
-              },
-              {
-                "value": "may",
-                "id": "may",
-                "synonyms": [
-                  "May"
-                ]
-              },
-              {
-                "value": "june",
-                "id": "june",
-                "synonyms": [
-                  "June"
-                ]
-              },
-              {
-                "value": "july",
-                "id": "july",
-                "synonyms": [
-                  "July"
-                ]
-              },
-              {
-                "value": "august",
-                "id": "august",
-                "synonyms": [
-                  "August"
-                ]
-              },
-              {
-                "value": "september",
-                "id": "september",
-                "synonyms": [
-                  "September"
-                ]
-              },
-              {
-                "value": "october",
-                "id": "october",
-                "synonyms": [
-                  "October"
-                ]
-              },
-              {
-                "value": "november",
-                "id": "november",
-                "synonyms": [
-                  "November"
-                ]
-              },
-              {
-                "value": "december",
-                "id": "december",
-                "synonyms": [
-                  "December"
+                  "nope",
+                  "nah",
+                  "negative",
+                  "not really"
                 ]
               }
             ]
           }
+        },
+        {
+          "argument": "medicationName",
+          "slot": "medicationName",
+          "slotType": "AMAZON.SearchQuery",
+          "required": false
+        }
+      ],
+      "elicitedArguments": [
+        "detail",
+        "occurredAt",
+        "aboutMemberId"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "medication_taken",
+              "check_in"
+            ],
+            "description": "What sort of event this is."
+          },
+          "medicationName": {
+            "description": "For medication_taken: what they took, as they said it (e.g. \"heart pill\").",
+            "type": "string"
+          },
+          "notOnSchedule": {
+            "description": "For medication_taken: true only when they confirmed it is a medicine that is not on their schedule.",
+            "type": "boolean"
+          },
+          "detail": {
+            "description": "Anything else they said about it, kept verbatim for the record.",
+            "type": "string"
+          },
+          "occurredAt": {
+            "description": "ISO timestamp if they said when. Defaults to now if they did not.",
+            "type": "string"
+          },
+          "aboutMemberId": {
+            "description": "Only when logging on behalf of someone else: their name as the family says it (e.g. \"Dad\"), or their id. Defaults to the speaker.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "record_appointment",
+      "description": "Record a scheduled appointment or any future dated commitment the person mentions - a doctor's visit, a haircut, book club on Wednesday, a birthday. It does not have to be medical: use this, not add_note, whenever there is a date and time. Not an alarm, a timer or a wake-up call, and not booking a taxi, train or flight: the assistant does those itself. It also works out what the appointment probably requires - only a MEDICAL one proposes a ride or a companion - and PROPOSES that work for a human to confirm. Proposals are guesses and are never treated as real until confirmed with confirm_proposal. Tell the person what was proposed and ask.",
+      "intent": "RecordAppointmentIntent",
+      "slots": [
+        {
+          "argument": "kind",
+          "slot": "kindRecordAppointment",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [
+        "startsAt",
+        "forMemberId",
+        "detail"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "What the appointment is, as said (e.g. \"cardiology\", \"dentist\")."
+          },
+          "startsAt": {
+            "type": "string",
+            "description": "ISO 8601 timestamp of when it starts, in the household's local time (e.g. \"2026-09-24T10:00:00\"). Resolve \"Thursday\" against today's date - never guess a date, and ask which day they meant if it is not clear."
+          },
+          "forMemberId": {
+            "description": "Who it is for: their name as the family says it (e.g. \"Mum\"), or their id. Leave it out when only one person is being cared for.",
+            "type": "string"
+          },
+          "detail": {
+            "description": "Anything else said about it.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "startsAt"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "add_note",
+      "description": "Record an observation, concern, or piece of context that the rest of the family should see - \"Mom sounded tired\", \"the doctor changed her dose\". Use this when there is something to SAY but nothing specific that must be DONE. If someone needs to take an action, use record_appointment or let the note stand and let them claim it. Only about someone's care: never a shopping or to-do list, music, a smart-home command or a message to someone outside the family - leave those to the assistant.\n\nIMPORTANT: if the person says they (or someone) will be UNAVAILABLE - \"I can't drive Thursday\", \"I won't be able to make Friday after all\", \"Renee is away next week\" - this is still an add_note, with `unavailable` filled in. It is never \"nothing to do\": work that person was covering may quietly stop being covered, and that silence is exactly what this system exists to catch.",
+      "intent": "AddNoteIntent",
+      "slots": [
+        {
+          "argument": "note",
+          "slot": "note",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [
+        "aboutMemberId",
+        "unavailable"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "description": "The observation, in the words it was said."
+          },
+          "aboutMemberId": {
+            "description": "Who it concerns: their name as the family says it (e.g. \"Mum\"), or their id.",
+            "type": "string"
+          },
+          "unavailable": {
+            "description": "Set when the note says someone cannot do something in a time window.",
+            "type": "object",
+            "properties": {
+              "memberName": {
+                "type": "string",
+                "description": "Who is unavailable, as the speaker named them."
+              },
+              "from": {
+                "type": "string",
+                "description": "ISO start of the window they cannot cover."
+              },
+              "to": {
+                "type": "string",
+                "description": "ISO end of the window."
+              }
+            },
+            "required": [
+              "memberName",
+              "from",
+              "to"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "note"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_care_gaps",
+      "description": "THE core tool. Returns everything that needs attention and has no owner - unclaimed work, expected records that are missing, and things past their due time. Use this for \"what needs doing\", \"what's unassigned\", \"what might fall through the cracks\", or \"is anything being missed\". Also use it to resolve an implicit reference: when someone says \"yes\", \"that one\", \"I've got it\" or \"that's done\" and you need to know which item they mean, call this to find it, then act. Results are already ranked by urgency and already phrased for speech: read them as written. Never restate a missing record as someone having failed to do something. The result also carries `recordedToday` - what HAS been logged today, and who logged it. Check it before saying anything about what has or has not been taken: a gap for one dose never means nothing was taken, and a dose somebody else logged is still a record.",
+      "intent": "GetCareGapsIntent",
+      "slots": [
+        {
+          "argument": "withinDays",
+          "slot": "withinDays",
+          "slotType": "AMAZON.NUMBER",
+          "required": false
         }
       ],
       "elicitedArguments": [],
       "inputSchema": {
         "type": "object",
         "properties": {
-          "park": {
+          "withinDays": {
+            "description": "Only include dated items within this many days. Omit for everything.",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 365
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "claim_obligation",
+      "description": "The speaker takes on a piece of work themselves (\"I'll do it\", \"I've got Thursday\", \"I can take that one\", \"leave it with me\"). To give work to someone ELSE, use assign_obligation instead. If you are unsure which item they mean - \"that one\", \"it\" - call get_care_gaps to find it, then claim it, rather than doing nothing.",
+      "intent": "ClaimObligationIntent",
+      "slots": [
+        {
+          "argument": "obligationId",
+          "slot": "obligationId",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "obligationId": {
             "type": "string",
-            "enum": [
-              "Yosemite",
-              "Yellowstone",
-              "Glacier",
-              "Grand Canyon",
-              "Everglades",
-              "Katmai",
-              "Great Basin",
-              "Acadia",
-              "Zion",
-              "Rocky Mountain",
-              "Olympic",
-              "Joshua Tree",
-              "Great Smoky Mountains",
-              "Bryce Canyon"
-            ],
-            "description": "The national park, by name"
-          },
-          "month": {
-            "description": "Month of the visit",
-            "type": "string",
-            "enum": [
-              "January",
-              "February",
-              "March",
-              "April",
-              "May",
-              "June",
-              "July",
-              "August",
-              "September",
-              "October",
-              "November",
-              "December"
-            ]
+            "description": "Which piece of work. From get_care_gaps."
           }
         },
         "required": [
-          "park"
+          "obligationId"
         ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "assign_obligation",
+      "description": "Assign work to another member of the care circle. Only the primary caregiver can do this. When the speaker is taking it on themselves, use claim_obligation instead.",
+      "intent": "AssignObligationIntent",
+      "slots": [
+        {
+          "argument": "obligationId",
+          "slot": "obligationId",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [
+        "assigneeName"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "obligationId": {
+            "type": "string",
+            "description": "Which piece of work. From get_care_gaps."
+          },
+          "assigneeName": {
+            "type": "string",
+            "description": "Who to give it to, as the speaker named them."
+          }
+        },
+        "required": [
+          "obligationId",
+          "assigneeName"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "request_owner",
+      "description": "Ask a member of the care circle whether they will take something on - \"ask David if he can drive her\", \"see if Renee can pick up the prescription\", \"can someone take Thursday?\", \"who can do this?\". This ASKS; it does not assign. They still have to say yes, and the work stays unowned until they do. If no name is given, leave assigneeName empty and this picks who to ask and explains why. Use assign_obligation only when the primary caregiver is putting it on someone's name outright, and claim_obligation when the speaker is taking it themselves.",
+      "intent": "RequestOwnerIntent",
+      "slots": [
+        {
+          "argument": "obligationId",
+          "slot": "obligationId",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [
+        "assigneeName"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "obligationId": {
+            "type": "string",
+            "description": "Which piece of work. From get_care_gaps."
+          },
+          "assigneeName": {
+            "description": "Who to ask, as the speaker named them. Omit to let CareCircle suggest someone.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "obligationId"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "respond_to_request",
+      "description": "The speaker answers something they were asked to take on - \"yes, I'll do it\", \"I can take that\", \"no, I can't\", \"sorry, not this week\". Accepting makes them the owner. Declining puts it back with no owner, records that they said no, and suggests who to ask next - a decline is an answer, not a failure.",
+      "intent": "RespondToRequestIntent",
+      "slots": [
+        {
+          "argument": "accepted",
+          "slot": "accepted",
+          "slotType": "YesNoType",
+          "required": true,
+          "customType": {
+            "name": "YesNoType",
+            "values": [
+              {
+                "value": "yes",
+                "id": "yes",
+                "synonyms": [
+                  "yeah",
+                  "yep",
+                  "sure",
+                  "correct",
+                  "right",
+                  "okay"
+                ]
+              },
+              {
+                "value": "no",
+                "id": "no",
+                "synonyms": [
+                  "nope",
+                  "nah",
+                  "negative",
+                  "not really"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "argument": "obligationId",
+          "slot": "obligationId",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [
+        "note"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "obligationId": {
+            "type": "string",
+            "description": "Which request they are answering."
+          },
+          "accepted": {
+            "type": "boolean",
+            "description": "True if they said yes, false if they said no."
+          },
+          "note": {
+            "description": "Anything they said about why, in their words.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "obligationId",
+          "accepted"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_my_requests",
+      "description": "Everything the speaker has been asked to take on and has not answered yet - \"what do I have for Mom?\", \"did anyone ask me to do anything?\", \"what am I down for?\", \"what was I asked?\". Read-only. Use this before respond_to_request when you do not know which request they mean.",
+      "intent": "GetMyRequestsIntent",
+      "slots": [],
+      "elicitedArguments": [],
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     },
     {
-      "name": "find_park",
-      "description": "Which national park suits an activity, a month, a state, or any combination of them. Answers outright when an activity is given; asks what the visitor wants to do when it is missing, because a month or a state alone leaves several parks in the running.",
-      "intent": "FindParkIntent",
+      "name": "get_provenance",
+      "description": "Explains the whole chain behind one piece of work - \"how do you know that?\", \"why are you saying this?\", \"where did that come from?\", \"who said she needs a ride?\". Walks what was actually recorded: how the obligation arose (a human confirmed it, the system guessed it, or there is simply no record), the signal or event it came from, and every ownership move since. Read-only. Use it whenever someone questions a gap or a claim. Speak the result verbatim - it is phrased to state a guess as a guess and an absent record as an absent record, and it never accuses anyone.",
+      "intent": "GetProvenanceIntent",
       "slots": [
         {
-          "argument": "activity",
-          "slot": "activity",
-          "slotType": "ActivityType",
-          "required": false,
-          "customType": {
-            "name": "ActivityType",
-            "values": [
-              {
-                "value": "hiking",
-                "id": "hiking"
-              },
-              {
-                "value": "wildlife watching",
-                "id": "wildlife_watching"
-              },
-              {
-                "value": "fishing",
-                "id": "fishing"
-              },
-              {
-                "value": "stargazing",
-                "id": "stargazing"
-              },
-              {
-                "value": "paddling",
-                "id": "paddling"
-              },
-              {
-                "value": "scenic driving",
-                "id": "scenic_driving"
-              },
-              {
-                "value": "camping",
-                "id": "camping"
-              },
-              {
-                "value": "biking",
-                "id": "biking"
-              },
-              {
-                "value": "climbing",
-                "id": "climbing"
-              },
-              {
-                "value": "winter sports",
-                "id": "winter_sports"
-              },
-              {
-                "value": "ranger programs",
-                "id": "ranger_programs"
-              }
-            ]
+          "argument": "obligationId",
+          "slot": "obligationId",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "obligationId": {
+            "type": "string",
+            "description": "Which piece of work to explain. From get_care_gaps."
           }
         },
+        "required": [
+          "obligationId"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_connections",
+      "description": "Reports what CareCircle is connected to - Google Calendar, Gmail, Ring, Bee, WhatsApp, Telegram - and for each whether it is LIVE (connected and receiving events), CONFIGURED (connected but nothing has arrived yet), or NOT CONNECTED. Use for \"what are you connected to?\", \"is Telegram working?\", \"which of my accounts are linked?\". Read-only, and honest: it never reports a connection that is not actually configured, and a door that has never carried an event is not called live. Speak the result as written.",
+      "intent": "GetConnectionsIntent",
+      "slots": [],
+      "elicitedArguments": [],
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "confirm_proposal",
+      "description": "The system infers work from appointments (a ride to cardiology, someone to take notes) but never treats a guess as real. This turns a guess into actual work, or dismisses it. A short affirmation of a suggested need - \"yes\", \"that's right\", \"she will need that\", \"someone should drive her\" - is a confirmation: call this. If you do not know which proposal they mean, call get_care_gaps first to find it, then confirm. Always ask a person before calling this - the confirmation must come from them, not from your own judgement about what seems sensible.",
+      "intent": "ConfirmProposalIntent",
+      "slots": [
         {
-          "argument": "month",
-          "slot": "month",
-          "slotType": "MonthType",
-          "required": false,
+          "argument": "confirmed",
+          "slot": "confirmed",
+          "slotType": "YesNoType",
+          "required": true,
           "customType": {
-            "name": "MonthType",
+            "name": "YesNoType",
             "values": [
               {
-                "value": "january",
-                "id": "january",
+                "value": "yes",
+                "id": "yes",
                 "synonyms": [
-                  "January"
+                  "yeah",
+                  "yep",
+                  "sure",
+                  "correct",
+                  "right",
+                  "okay"
                 ]
               },
               {
-                "value": "february",
-                "id": "february",
+                "value": "no",
+                "id": "no",
                 "synonyms": [
-                  "February"
-                ]
-              },
-              {
-                "value": "march",
-                "id": "march",
-                "synonyms": [
-                  "March"
-                ]
-              },
-              {
-                "value": "april",
-                "id": "april",
-                "synonyms": [
-                  "April"
-                ]
-              },
-              {
-                "value": "may",
-                "id": "may",
-                "synonyms": [
-                  "May"
-                ]
-              },
-              {
-                "value": "june",
-                "id": "june",
-                "synonyms": [
-                  "June"
-                ]
-              },
-              {
-                "value": "july",
-                "id": "july",
-                "synonyms": [
-                  "July"
-                ]
-              },
-              {
-                "value": "august",
-                "id": "august",
-                "synonyms": [
-                  "August"
-                ]
-              },
-              {
-                "value": "september",
-                "id": "september",
-                "synonyms": [
-                  "September"
-                ]
-              },
-              {
-                "value": "october",
-                "id": "october",
-                "synonyms": [
-                  "October"
-                ]
-              },
-              {
-                "value": "november",
-                "id": "november",
-                "synonyms": [
-                  "November"
-                ]
-              },
-              {
-                "value": "december",
-                "id": "december",
-                "synonyms": [
-                  "December"
+                  "nope",
+                  "nah",
+                  "negative",
+                  "not really"
                 ]
               }
             ]
           }
         },
         {
-          "argument": "state",
-          "slot": "state",
-          "slotType": "StateType",
+          "argument": "obligationId",
+          "slot": "obligationId",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "obligationId": {
+            "type": "string",
+            "description": "The proposal being answered."
+          },
+          "confirmed": {
+            "type": "boolean",
+            "description": "True if the person said it is needed, false if not."
+          }
+        },
+        "required": [
+          "obligationId",
+          "confirmed"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "resolve_obligation",
+      "description": "Mark a task or errand as done, so it stops showing as open. Use this when someone says a piece of work is handled - \"that's sorted now\", \"taken care of\", \"I dropped it off\", \"done\" - including errands and rides reported in the past tense, which are work being closed, not events to log. If they do not name which task, call get_care_gaps first to find which one they mean, then resolve it.",
+      "intent": "ResolveObligationIntent",
+      "slots": [
+        {
+          "argument": "obligationId",
+          "slot": "obligationId",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [
+        "note"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "obligationId": {
+            "type": "string",
+            "description": "Which piece of work."
+          },
+          "note": {
+            "description": "Anything they said about how it went.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "obligationId"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "run_care_agent",
+      "description": "Have CareCircle proactively review everything unowned and, where it is worth interrupting somebody, ASK the fairest person to take it on - the same thing it does on its own in the background. Use this for \"check on things\", \"is anything being missed\", \"chase up the open items\", or to see what the agent would do. It only ever asks; it never assigns work to anyone. It reports both what it did and what it deliberately left alone, and why.",
+      "intent": "RunCareAgentIntent",
+      "slots": [
+        {
+          "argument": "dryRun",
+          "slot": "dryRun",
+          "slotType": "YesNoType",
           "required": false,
           "customType": {
-            "name": "StateType",
+            "name": "YesNoType",
             "values": [
               {
-                "value": "alaska",
-                "id": "alaska",
+                "value": "yes",
+                "id": "yes",
                 "synonyms": [
-                  "Alaska"
+                  "yeah",
+                  "yep",
+                  "sure",
+                  "correct",
+                  "right",
+                  "okay"
                 ]
               },
               {
-                "value": "arizona",
-                "id": "arizona",
+                "value": "no",
+                "id": "no",
                 "synonyms": [
-                  "Arizona"
-                ]
-              },
-              {
-                "value": "california",
-                "id": "california",
-                "synonyms": [
-                  "California"
-                ]
-              },
-              {
-                "value": "colorado",
-                "id": "colorado",
-                "synonyms": [
-                  "Colorado"
-                ]
-              },
-              {
-                "value": "florida",
-                "id": "florida",
-                "synonyms": [
-                  "Florida"
-                ]
-              },
-              {
-                "value": "idaho",
-                "id": "idaho",
-                "synonyms": [
-                  "Idaho"
-                ]
-              },
-              {
-                "value": "maine",
-                "id": "maine",
-                "synonyms": [
-                  "Maine"
-                ]
-              },
-              {
-                "value": "montana",
-                "id": "montana",
-                "synonyms": [
-                  "Montana"
-                ]
-              },
-              {
-                "value": "nevada",
-                "id": "nevada",
-                "synonyms": [
-                  "Nevada"
-                ]
-              },
-              {
-                "value": "north carolina",
-                "id": "north_carolina",
-                "synonyms": [
-                  "North Carolina"
-                ]
-              },
-              {
-                "value": "tennessee",
-                "id": "tennessee",
-                "synonyms": [
-                  "Tennessee"
-                ]
-              },
-              {
-                "value": "utah",
-                "id": "utah",
-                "synonyms": [
-                  "Utah"
-                ]
-              },
-              {
-                "value": "washington",
-                "id": "washington",
-                "synonyms": [
-                  "Washington"
-                ]
-              },
-              {
-                "value": "wyoming",
-                "id": "wyoming",
-                "synonyms": [
-                  "Wyoming"
+                  "nope",
+                  "nah",
+                  "negative",
+                  "not really"
                 ]
               }
             ]
@@ -538,68 +619,899 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "activity": {
-            "description": "What the visitor wants to do",
+          "dryRun": {
+            "description": "When true, report what it would do without asking anyone. Defaults to false.",
+            "type": "boolean"
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_care_summary",
+      "description": "A picture of the day: what has been logged, what notes the family added, what is coming up, and anything unowned. Use for \"how is she doing\", \"what happened today\", \"catch me up\". For unowned work specifically, get_care_gaps is sharper.",
+      "intent": "GetCareSummaryIntent",
+      "slots": [],
+      "elicitedArguments": [],
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "get_shift_brief",
+      "description": "A short handoff brief for whoever is on duty: what is due, what they own, and any recent notes that change how today should go. Use it when a helper or aide asks what they need to know, what is happening today, or what medications the person is on today - for the aide this is how they see the day. Scoped deliberately - it does not expose the whole family record.",
+      "intent": "GetShiftBriefIntent",
+      "slots": [],
+      "elicitedArguments": [],
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "notify_member",
+      "description": "Send a short message to another member of the care circle - \"tell Renee I'm taking Mom Thursday\", \"let David know the pharmacy called\", \"message Renee about the appointment change\", \"text Renee\". Any of tell / message / text / let-know a named person maps here. Use this when the speaker wants a specific PERSON told something. To record something for the whole family to see later, use add_note. Only for people in this care circle, and never for email: anyone else, or an email, is the assistant's own job.",
+      "intent": "NotifyMemberIntent",
+      "slots": [
+        {
+          "argument": "recipientName",
+          "slot": "recipientName",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [
+        "message"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "recipientName": {
             "type": "string",
-            "enum": [
-              "hiking",
-              "wildlife watching",
-              "fishing",
-              "stargazing",
-              "paddling",
-              "scenic driving",
-              "camping",
-              "biking",
-              "climbing",
-              "winter sports",
-              "ranger programs"
-            ]
+            "description": "Who to tell, as the speaker named them."
           },
-          "month": {
-            "description": "Month of the visit",
+          "message": {
             "type": "string",
-            "enum": [
-              "January",
-              "February",
-              "March",
-              "April",
-              "May",
-              "June",
-              "July",
-              "August",
-              "September",
-              "October",
-              "November",
-              "December"
-            ]
-          },
-          "state": {
-            "description": "US state to look in",
-            "type": "string",
-            "enum": [
-              "Alaska",
-              "Arizona",
-              "California",
-              "Colorado",
-              "Florida",
-              "Idaho",
-              "Maine",
-              "Montana",
-              "Nevada",
-              "North Carolina",
-              "Tennessee",
-              "Utah",
-              "Washington",
-              "Wyoming"
+            "description": "What to tell them, in the speaker's own words."
+          }
+        },
+        "required": [
+          "recipientName",
+          "message"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "ingest_signal",
+      "description": "Take an observation from a device in the home - a Ring doorbell, a camera, a sensor - and fold it into the care record. Use this for physical-world events nobody typed: a delivery arriving at the door, activity or the absence of it. A signal is EVIDENCE, not a conclusion: a delivery is grounds to ASK whether the prescription was picked up, not to mark it done; no activity is grounds to ASK whether someone should check in, never a claim that something is wrong.",
+      "intent": "IngestSignalIntent",
+      "slots": [
+        {
+          "argument": "source",
+          "slot": "source",
+          "slotType": "SourceType",
+          "required": true,
+          "customType": {
+            "name": "SourceType",
+            "values": [
+              {
+                "value": "ring",
+                "id": "ring"
+              },
+              {
+                "value": "other",
+                "id": "other"
+              }
             ]
           }
         },
+        {
+          "argument": "kind",
+          "slot": "kindIngestSignal",
+          "slotType": "IngestSignalKindType",
+          "required": true,
+          "customType": {
+            "name": "IngestSignalKindType",
+            "values": [
+              {
+                "value": "delivery arrived",
+                "id": "delivery_arrived",
+                "synonyms": [
+                  "delivery_arrived"
+                ]
+              },
+              {
+                "value": "door activity",
+                "id": "door_activity",
+                "synonyms": [
+                  "door_activity"
+                ]
+              },
+              {
+                "value": "motion",
+                "id": "motion"
+              },
+              {
+                "value": "no activity",
+                "id": "no_activity",
+                "synonyms": [
+                  "no_activity"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "argument": "occurredAt",
+          "slot": "occurredAt",
+          "slotType": "AMAZON.SearchQuery",
+          "required": false
+        }
+      ],
+      "elicitedArguments": [
+        "detail"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "ring",
+              "other"
+            ],
+            "description": "Which device reported it."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "delivery_arrived",
+              "door_activity",
+              "motion",
+              "no_activity"
+            ],
+            "description": "What was observed."
+          },
+          "occurredAt": {
+            "description": "ISO time observed. Defaults to now.",
+            "type": "string"
+          },
+          "detail": {
+            "description": "Anything the device reported, kept verbatim.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "kind"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "reorder_prescription",
+      "description": "Some work is closed by buying the thing, not by doing it. When a prescription needs refilling - often the same one a delivery or a pickup gap is about - this prepares a priced OFFER from a pharmacy and presents it. It does NOT buy anything: like every inference here, a purchase is a proposal until a person confirms it with confirm_purchase. Tell them the item, the price and the ETA, and that nothing is charged yet. Call it straight away for \"refill his prescription\", \"order more of her supplement\" or \"reorder my meds\" - do not ask which medication first. This knows what is on record and asks back itself if it cannot tell.",
+      "intent": "ReorderPrescriptionIntent",
+      "slots": [
+        {
+          "argument": "medicationName",
+          "slot": "medicationName",
+          "slotType": "AMAZON.SearchQuery",
+          "required": false
+        }
+      ],
+      "elicitedArguments": [
+        "obligationId"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "medicationName": {
+            "description": "What they said to refill, in their words (e.g. \"eye drops\", \"his supplement\"). Leave it out if they did not name one.",
+            "type": "string"
+          },
+          "obligationId": {
+            "description": "The pickup/refill Care Gap this would close, if known.",
+            "type": "string"
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "confirm_purchase",
+      "description": "Confirm a purchase that was offered, or decline it. This is the only step that commits money. On confirmation the order is placed and, if the purchase closes a Care Gap (a prescription pickup), that work is marked done. Only call this when a person has said yes to a specific offer - never on your own judgement. \"Yes, place the order\" or \"go ahead and buy it\" is this tool even when you do not have the offer id: leave offerId out and it finds the order that is waiting.",
+      "intent": "ConfirmPurchaseIntent",
+      "slots": [
+        {
+          "argument": "confirmed",
+          "slot": "confirmed",
+          "slotType": "YesNoType",
+          "required": true,
+          "customType": {
+            "name": "YesNoType",
+            "values": [
+              {
+                "value": "yes",
+                "id": "yes",
+                "synonyms": [
+                  "yeah",
+                  "yep",
+                  "sure",
+                  "correct",
+                  "right",
+                  "okay"
+                ]
+              },
+              {
+                "value": "no",
+                "id": "no",
+                "synonyms": [
+                  "nope",
+                  "nah",
+                  "negative",
+                  "not really"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "argument": "offerId",
+          "slot": "offerId",
+          "slotType": "AMAZON.SearchQuery",
+          "required": false
+        }
+      ],
+      "elicitedArguments": [],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "offerId": {
+            "description": "The offer being answered, from reorder_prescription. Leave it out when you do not have it; the waiting order is found for you.",
+            "type": "string"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "description": "True to place the order, false to decline it."
+          }
+        },
+        "required": [
+          "confirmed"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_started",
+      "description": "Call this FIRST whenever someone new arrives, asks to get set up, says \"set up a care circle\", or seems not to belong to a circle yet. It returns the single next onboarding step, already phrased to speak: create the circle, add the person being cared for, add one medication or appointment, or - once there is enough - the first thing that needs an owner. Follow the spoken step, do that one action with the matching tool (create_household, add_member, add_medication, record_appointment), then call get_started again for the next step. Do not ask for everything at once.",
+      "intent": "GetStartedIntent",
+      "slots": [],
+      "elicitedArguments": [],
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
         "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "create_household",
+      "description": "Start a brand-new care circle. This is the one action available to someone who is authenticated but not yet part of any circle: it creates the household and makes the caller its first primary caregiver. Everyone else joins an existing circle via add_member.",
+      "intent": "CreateHouseholdIntent",
+      "slots": [
+        {
+          "argument": "name",
+          "slot": "name",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [
+        "timezone",
+        "callerName",
+        "spokenAs"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "A name for the care circle, e.g. \"Margaret's care circle\"."
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone, e.g. \"America/New_York\". Medication times are read in it."
+          },
+          "callerName": {
+            "type": "string",
+            "description": "The founding caregiver's name, as they gave it."
+          },
+          "spokenAs": {
+            "description": "How the caller is referred to when spoken about.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "timezone",
+          "callerName"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "add_member",
+      "description": "Add a member to this care circle and give them a role: care_recipient, primary_caregiver, caregiver, or helper. Only a primary caregiver can do this. If the new member will sign in, pass the subject their credential carries so they resolve to this member.",
+      "intent": "AddMemberIntent",
+      "slots": [
+        {
+          "argument": "role",
+          "slot": "role",
+          "slotType": "RoleType",
+          "required": true,
+          "customType": {
+            "name": "RoleType",
+            "values": [
+              {
+                "value": "care recipient",
+                "id": "care_recipient",
+                "synonyms": [
+                  "care_recipient"
+                ]
+              },
+              {
+                "value": "primary caregiver",
+                "id": "primary_caregiver",
+                "synonyms": [
+                  "primary_caregiver"
+                ]
+              },
+              {
+                "value": "caregiver",
+                "id": "caregiver"
+              },
+              {
+                "value": "helper",
+                "id": "helper"
+              }
+            ]
+          }
+        },
+        {
+          "argument": "needsAccessibleTransport",
+          "slot": "needsAccessibleTransport",
+          "slotType": "YesNoType",
+          "required": false,
+          "customType": {
+            "name": "YesNoType",
+            "values": [
+              {
+                "value": "yes",
+                "id": "yes",
+                "synonyms": [
+                  "yeah",
+                  "yep",
+                  "sure",
+                  "correct",
+                  "right",
+                  "okay"
+                ]
+              },
+              {
+                "value": "no",
+                "id": "no",
+                "synonyms": [
+                  "nope",
+                  "nah",
+                  "negative",
+                  "not really"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "argument": "requiresAssistance",
+          "slot": "requiresAssistance",
+          "slotType": "YesNoType",
+          "required": false,
+          "customType": {
+            "name": "YesNoType",
+            "values": [
+              {
+                "value": "yes",
+                "id": "yes",
+                "synonyms": [
+                  "yeah",
+                  "yep",
+                  "sure",
+                  "correct",
+                  "right",
+                  "okay"
+                ]
+              },
+              {
+                "value": "no",
+                "id": "no",
+                "synonyms": [
+                  "nope",
+                  "nah",
+                  "negative",
+                  "not really"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "argument": "dailyUpdate",
+          "slot": "dailyUpdate",
+          "slotType": "YesNoType",
+          "required": false,
+          "customType": {
+            "name": "YesNoType",
+            "values": [
+              {
+                "value": "yes",
+                "id": "yes",
+                "synonyms": [
+                  "yeah",
+                  "yep",
+                  "sure",
+                  "correct",
+                  "right",
+                  "okay"
+                ]
+              },
+              {
+                "value": "no",
+                "id": "no",
+                "synonyms": [
+                  "nope",
+                  "nah",
+                  "negative",
+                  "not really"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "argument": "name",
+          "slot": "name",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [
+        "spokenAs",
+        "subject",
+        "livesAway"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Their name."
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "care_recipient",
+              "primary_caregiver",
+              "caregiver",
+              "helper"
+            ],
+            "description": "Their authority in the circle."
+          },
+          "spokenAs": {
+            "description": "How they are referred to when spoken about.",
+            "type": "string"
+          },
+          "subject": {
+            "description": "The credential subject that authenticates as this member.",
+            "type": "string"
+          },
+          "needsAccessibleTransport": {
+            "description": "Getting them places needs an accessible vehicle. Raises the risk of a dropped ride.",
+            "type": "boolean"
+          },
+          "requiresAssistance": {
+            "description": "Their care needs someone who can give hands-on help, not just anyone free.",
+            "type": "boolean"
+          },
+          "livesAway": {
+            "description": "Where they live, if far away (e.g. \"London\"). They will never be picked automatically for work that needs someone there.",
+            "type": "string"
+          },
+          "dailyUpdate": {
+            "description": "Send them a short update on the day every evening.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "role"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "add_medication",
+      "description": "Record a medication and the times it is due, so missing doses can be noticed. Times are 24-hour \"HH:MM\" in the household timezone. Only a primary caregiver can do this.",
+      "intent": "AddMedicationIntent",
+      "slots": [
+        {
+          "argument": "until",
+          "slot": "until",
+          "slotType": "AMAZON.DATE",
+          "required": false
+        },
+        {
+          "argument": "name",
+          "slot": "name",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [
+        "times",
+        "forMemberId",
+        "alsoCalled"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The medication, as the family calls it (e.g. \"heart pill\")."
+          },
+          "times": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Due times, 24-hour \"HH:MM\", e.g. [\"08:00\",\"20:00\"]."
+          },
+          "until": {
+            "description": "The last day, \"YYYY-MM-DD\" in the household's time, when it is for a set course (\"for two weeks\").",
+            "type": "string"
+          },
+          "forMemberId": {
+            "description": "Who it is for: their name as the family says it (e.g. \"Mum\"), or their id. Leave it out when only one person is being cared for.",
+            "type": "string"
+          },
+          "alsoCalled": {
+            "description": "Only when the family says what they call it in another language (\"Mum calls her eye drops colírio\"). Never translate a name yourself.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "language": {
+                  "type": "string",
+                  "enum": [
+                    "en",
+                    "es",
+                    "fr",
+                    "pt",
+                    "de",
+                    "it",
+                    "hi",
+                    "zh",
+                    "pcm",
+                    "yo",
+                    "ig",
+                    "ha",
+                    "bin"
+                  ],
+                  "description": "The language of that name: es, fr, pt, de, it, hi, zh, pcm, yo, ig, ha, bin or en."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The name, exactly as the family says it in that language (e.g. \"colírio\")."
+                }
+              },
+              "required": [
+                "language",
+                "name"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "name",
+          "times"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "remove_member",
+      "description": "Remove a member. Their open work is not deleted - it is released back to the circle as unowned, so it resurfaces as a Care Gap rather than vanishing. Only a primary caregiver can do this, and the last primary caregiver cannot be removed.",
+      "intent": "RemoveMemberIntent",
+      "slots": [
+        {
+          "argument": "memberId",
+          "slot": "memberId",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "description": "Who to remove."
+          }
+        },
+        "required": [
+          "memberId"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "change_medication",
+      "description": "Change a medication that is already on the schedule, or stop it - when the doctor or the family changes the treatment. New dose times (\"she takes it at 9 now\"), a last day (\"only until the 7th\", \"for two more weeks\"), or stop it now (\"the doctor stopped the eye drops\"), or correct its name when it was entered wrong (\"it's not eye drops, it's the pain tablets\"). The record keeps what it was; it is just no longer expected. For a new medication use add_medication.",
+      "intent": "ChangeMedicationIntent",
+      "slots": [
+        {
+          "argument": "until",
+          "slot": "until",
+          "slotType": "AMAZON.DATE",
+          "required": false
+        },
+        {
+          "argument": "stopNow",
+          "slot": "stopNow",
+          "slotType": "YesNoType",
+          "required": false,
+          "customType": {
+            "name": "YesNoType",
+            "values": [
+              {
+                "value": "yes",
+                "id": "yes",
+                "synonyms": [
+                  "yeah",
+                  "yep",
+                  "sure",
+                  "correct",
+                  "right",
+                  "okay"
+                ]
+              },
+              {
+                "value": "no",
+                "id": "no",
+                "synonyms": [
+                  "nope",
+                  "nah",
+                  "negative",
+                  "not really"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "argument": "medicationName",
+          "slot": "medicationName",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [
+        "forMemberId",
+        "times",
+        "newName",
+        "alsoCalled"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "medicationName": {
+            "type": "string",
+            "description": "The medication as they said it (e.g. \"eye drops\")."
+          },
+          "forMemberId": {
+            "description": "Who takes it: their name as the family says it (e.g. \"Dad\"), or their id. Needed when two people take a medication with that name.",
+            "type": "string"
+          },
+          "times": {
+            "description": "New due times, 24-hour \"HH:MM\", e.g. [\"09:00\",\"21:00\"].",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "until": {
+            "description": "The last day it is taken, \"YYYY-MM-DD\" in the household's time. Work it out from what they said against today's date.",
+            "type": "string"
+          },
+          "stopNow": {
+            "description": "True when it has been stopped as of now.",
+            "type": "boolean"
+          },
+          "newName": {
+            "description": "Its correct name, when the one on the record is wrong. The doses already recorded stay with it.",
+            "type": "string"
+          },
+          "alsoCalled": {
+            "description": "Only when the family says what they call it in another language (\"Mum calls her eye drops colírio\"). Never translate a name yourself.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "language": {
+                  "type": "string",
+                  "enum": [
+                    "en",
+                    "es",
+                    "fr",
+                    "pt",
+                    "de",
+                    "it",
+                    "hi",
+                    "zh",
+                    "pcm",
+                    "yo",
+                    "ig",
+                    "ha",
+                    "bin"
+                  ],
+                  "description": "The language of that name: es, fr, pt, de, it, hi, zh, pcm, yo, ig, ha, bin or en."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The name, exactly as the family says it in that language (e.g. \"colírio\")."
+                }
+              },
+              "required": [
+                "language",
+                "name"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "medicationName"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "change_appointment",
+      "description": "Move or cancel an appointment that is already on the record - \"the check-up has moved to Friday at 2\", \"the dentist is cancelled\", \"they pushed it back an hour\". What was arranged for it, like a ride, moves or is called off with it, and whoever had taken that on is told. For a new appointment use record_appointment.",
+      "intent": "ChangeAppointmentIntent",
+      "slots": [
+        {
+          "argument": "cancel",
+          "slot": "cancel",
+          "slotType": "YesNoType",
+          "required": false,
+          "customType": {
+            "name": "YesNoType",
+            "values": [
+              {
+                "value": "yes",
+                "id": "yes",
+                "synonyms": [
+                  "yeah",
+                  "yep",
+                  "sure",
+                  "correct",
+                  "right",
+                  "okay"
+                ]
+              },
+              {
+                "value": "no",
+                "id": "no",
+                "synonyms": [
+                  "nope",
+                  "nah",
+                  "negative",
+                  "not really"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "argument": "appointment",
+          "slot": "appointment",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [
+        "forMemberId",
+        "newStartsAt"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "appointment": {
+            "type": "string",
+            "description": "Which appointment, as they said it (e.g. \"the eye check-up\", \"dentist\")."
+          },
+          "forMemberId": {
+            "description": "Whose appointment: their name as the family says it, or their id. Needed only when it is unclear.",
+            "type": "string"
+          },
+          "newStartsAt": {
+            "description": "When it is now, ISO 8601 in the household's local time (e.g. \"2026-10-02T14:00:00\"). Resolve \"Friday\" against today's date.",
+            "type": "string"
+          },
+          "cancel": {
+            "description": "True when it is cancelled.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "appointment"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "raise_urgent",
+      "description": "Tell everyone in the family at once that something serious is happening - a fall, bad pain, trouble breathing, chest pain, sudden confusion, bleeding that will not stop, they cannot be reached, or they have been taken to hospital. Use this the moment someone describes an emergency or asks for everyone to be alerted now, before anything else. It does not call emergency services: it tells the person to.",
+      "intent": "RaiseUrgentIntent",
+      "slots": [
+        {
+          "argument": "what",
+          "slot": "what",
+          "slotType": "AMAZON.SearchQuery",
+          "required": true
+        }
+      ],
+      "elicitedArguments": [
+        "forMemberId"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "what": {
+            "type": "string",
+            "description": "What is happening, in their words (e.g. \"Dad fell in the bathroom\")."
+          },
+          "forMemberId": {
+            "description": "Who it is about: their name as the family says it, or their id.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "what"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
       }
     }
   ],
   "examplePhrases": [
-    "what is yosemite like in january",
-    "what is the best national park for hiking"
+    "did Daddy use his evening eye drops",
+    "how was Daddy's day"
   ]
 }
