@@ -2,6 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { cleanSpeech, endsWithQuestion } from './speech.js';
 
 describe('cleanSpeech', () => {
+  it("never speaks the model's reasoning", () => {
+    expect(
+      cleanSpeech(
+        '<thinking>The user asked about "heart".</thinking> There is a dose logged at 6.',
+      ),
+    ).toBe('There is a dose logged at 6.');
+    expect(cleanSpeech('Sure. <thinking>unfinished')).toBe('Sure.');
+  });
+
   it('strips markdown, bullets, links, and code', () => {
     const input =
       '# Hotels\n\n- **Hotel Adlon** at *320 euros*\n- [Michelberger](https://x.y) at 140\n\n`code` here';
