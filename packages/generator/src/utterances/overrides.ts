@@ -43,6 +43,8 @@ export interface Overrides {
   utterances: Record<string, string[]>;
   /** Training phrases for the catch-all request slot. */
   catchAll: string[];
+  /** Spoken in the welcome as examples, instead of ones built from the first two tools. */
+  greeting?: string[];
   /** Slot type name → value → spoken synonyms. */
   slotSynonyms: Record<string, Record<string, string[]>>;
   /** Extra intents that route to an existing tool. */
@@ -51,7 +53,7 @@ export interface Overrides {
 
 export type UtteranceOverrides = Overrides['utterances'];
 
-const RESERVED = new Set(['catchAll', 'slotSynonyms', 'intents']);
+const RESERVED = new Set(['catchAll', 'slotSynonyms', 'intents', 'greeting']);
 
 export function readOverrides(path: string): Overrides {
   const empty: Overrides = { utterances: {}, catchAll: [], slotSynonyms: {}, intents: [] };
@@ -66,7 +68,9 @@ export function readOverrides(path: string): Overrides {
   const out: Overrides = { ...empty, utterances: {}, slotSynonyms: {}, intents: [], catchAll: [] };
   for (const [key, value] of Object.entries(parsed.data)) {
     if (key.startsWith('_')) continue;
-    if (key === 'catchAll' && Array.isArray(value)) {
+    if (key === 'greeting' && Array.isArray(value)) {
+      out.greeting = value.filter((v): v is string => typeof v === 'string');
+    } else if (key === 'catchAll' && Array.isArray(value)) {
       out.catchAll = value.filter((v): v is string => typeof v === 'string');
     } else if (
       key === 'slotSynonyms' &&

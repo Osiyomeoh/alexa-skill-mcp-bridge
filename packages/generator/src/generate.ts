@@ -124,6 +124,8 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
       }
       return [{ name: alias.name, tool, samples: merged.utterances }];
     });
+    if (examplePhrases.length === 0 && overrides.greeting?.length)
+      examplePhrases = overrides.greeting;
     if (examplePhrases.length === 0) {
       examplePhrases = draft.tools
         .filter((tool) => !tool.aliasOf)
@@ -141,6 +143,7 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
         catchAllPhrases: [...overrides.catchAll, ...training.catchAll],
         aliases,
         slotSynonyms: overrides.slotSynonyms,
+        fallbackSensitivity: config.features.fallbackSensitivity,
       },
     );
     models[locale] = model;

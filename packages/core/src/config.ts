@@ -136,6 +136,12 @@ export const bridgeConfigSchema = z.object({
        * recognise still reaches the agent as text instead of dying in AMAZON.FallbackIntent.
        */
       catchAll: z.boolean().default(true),
+      /**
+       * How readily Alexa sends a phrase to AMAZON.FallbackIntent, which carries no text. Unset:
+       * Alexa's default (MEDIUM). LOW sends more of what the model was not trained on to the
+       * catch-all, as text, instead of dropping it.
+       */
+      fallbackSensitivity: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
     })
     .prefault({}),
   aws: z

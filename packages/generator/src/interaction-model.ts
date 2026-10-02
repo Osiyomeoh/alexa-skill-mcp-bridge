@@ -32,6 +32,7 @@ export interface InteractionModel {
       invocationName: string;
       intents: AlexaIntent[];
       types: AlexaType[];
+      modelConfiguration?: { fallbackIntentSensitivity: { level: 'LOW' | 'MEDIUM' | 'HIGH' } };
     };
   };
 }
@@ -198,6 +199,8 @@ export interface InteractionModelOptions {
   aliases?: { name: string; tool: ManifestTool; samples: string[] }[];
   /** Type name → value → synonyms, from overrides. */
   slotSynonyms?: Record<string, Record<string, string[]>>;
+  /** features.fallbackSensitivity: unset leaves Alexa's default. */
+  fallbackSensitivity?: 'LOW' | 'MEDIUM' | 'HIGH';
 }
 
 export function buildInteractionModel(
@@ -274,6 +277,13 @@ export function buildInteractionModel(
             name: { value: v.value, ...(v.synonyms?.length ? { synonyms: v.synonyms } : {}) },
           })),
         })),
+        ...(options.fallbackSensitivity
+          ? {
+              modelConfiguration: {
+                fallbackIntentSensitivity: { level: options.fallbackSensitivity },
+              },
+            }
+          : {}),
       },
     },
   };

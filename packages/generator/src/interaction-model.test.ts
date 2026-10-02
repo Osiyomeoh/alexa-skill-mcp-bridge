@@ -94,3 +94,18 @@ describe('buildInteractionModel', () => {
     }
   });
 });
+
+describe('fallback sensitivity', () => {
+  it('is left to Alexa unless set', () => {
+    const model = buildInteractionModel(manifest, utterances, [], 'parks').interactionModel
+      .languageModel;
+    expect(model.modelConfiguration).toBeUndefined();
+  });
+
+  it('is written as modelConfiguration when set', () => {
+    const model = buildInteractionModel(manifest, utterances, [], 'parks', {
+      fallbackSensitivity: 'LOW',
+    }).interactionModel.languageModel;
+    expect(model.modelConfiguration).toEqual({ fallbackIntentSensitivity: { level: 'LOW' } });
+  });
+});
